@@ -42,10 +42,10 @@ export default {
 }
 
 .welcome-section h1 {
-  font-size: 2.5rem;
-  background: linear-gradient(to right, var(--text-primary), var(--text-secondary));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  font-size: 3rem;
+  color: var(--text-primary);
+  font-weight: 700;
+  letter-spacing: -0.04em;
   margin-bottom: 0.5rem;
 }
 

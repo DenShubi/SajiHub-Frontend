@@ -23,26 +23,63 @@
       
       <div class="detail-content-col">
         <div class="card detail-card">
-          <h1>{{ menu.name }}</h1>
-          <div class="price-tag">Rp {{ formatPrice(menu.price) }}</div>
-          
-          <div class="meta-info">
-            <p><strong>Description:</strong></p>
-            <p class="desc-text">{{ menu.description || 'No description provided.' }}</p>
+          <template v-if="!isEditing">
+            <h1>{{ menu.name }}</h1>
+            <div class="price-tag">Rp {{ formatPrice(menu.price) }}</div>
             
-            <p class="dates">
-              Added: {{ formatDate(menu.created_at) }}
-            </p>
-          </div>
+            <div class="meta-info">
+              <p><strong>Description:</strong></p>
+              <p class="desc-text">{{ menu.description || 'No description provided.' }}</p>
+              
+              <p class="dates">
+                Added: {{ formatDate(menu.created_at) }}
+              </p>
+            </div>
 
-          <div v-if="userRole === 'Admin'" class="admin-actions">
-            <hr />
-            <h3>Admin Zone</h3>
-            <p class="warning-text">Be careful, deleting is permanent.</p>
-            <button @click="confirmDelete" :disabled="isDeleting" class="btn-danger">
-              {{ isDeleting ? 'Deleting...' : 'Delete Menu Item' }}
-            </button>
-          </div>
+            <div v-if="userRole === 'Admin'" class="admin-actions">
+              <hr />
+              <h3>Admin Zone</h3>
+              <p class="warning-text">Manage this menu item.</p>
+              <div class="action-buttons">
+                <button @click="startEdit" class="btn-primary">Edit Menu Item</button>
+                <button @click="confirmDelete" :disabled="isDeleting" class="btn-danger">
+                  {{ isDeleting ? 'Deleting...' : 'Delete Menu Item' }}
+                </button>
+              </div>
+            </div>
+          </template>
+
+          <template v-else>
+            <h2>Edit Menu Item</h2>
+            <form @submit.prevent="submitEdit" class="edit-form">
+              <div class="form-group">
+                <label>Name</label>
+                <input v-model="editForm.name" required />
+              </div>
+              <div class="form-group">
+                <label>Price (Rp)</label>
+                <input v-model="editForm.price" type="number" required />
+              </div>
+              <div class="form-group">
+                <label>Description</label>
+                <textarea v-model="editForm.description" rows="3"></textarea>
+              </div>
+              <div class="form-group upload-section">
+                <label>Menu Image (Required)</label>
+                <div class="file-input-wrapper">
+                  <input type="file" @change="onEditFileChange" accept="image/*" required />
+                </div>
+              </div>
+              <div class="action-buttons edit-actions">
+                <button type="submit" :disabled="isUpdating" class="btn-primary">
+                  {{ isUpdating ? 'Updating...' : 'Save Changes' }}
+                </button>
+                <button type="button" @click="cancelEdit" class="btn-secondary" :disabled="isUpdating">
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </template>
         </div>
       </div>
     </div>
@@ -57,7 +94,15 @@ export default {
       menu: null,
       userRole: '',
       isLoading: true,
-      isDeleting: false
+      isDeleting: false,
+      isEditing: false,
+      isUpdating: false,
+      editForm: {
+        name: '',
+        price: '',
+        description: '',
+        image: null
+      }
     };
   },
   methods: {
@@ -84,6 +129,62 @@ export default {
         console.error("Fetch detail error:", error);
       } finally {
         this.isLoading = false;
+      }
+    },
+
+    // UPDATE
+    startEdit() {
+      this.editForm = {
+        name: this.menu.name,
+        price: this.menu.price,
+        description: this.menu.description,
+        image: null
+      };
+      this.isEditing = true;
+    },
+    cancelEdit() {
+      this.isEditing = false;
+    },
+    onEditFileChange(event) {
+      this.editForm.image = event.target.files[0];
+    },
+    async submitEdit() {
+      if (!this.editForm.image) {
+        alert("Image is required to update the menu item.");
+        return;
+      }
+      this.isUpdating = true;
+      const formData = new FormData();
+      formData.append('name', this.editForm.name);
+      formData.append('price', this.editForm.price);
+      formData.append('description', this.editForm.description || '');
+      formData.append('image', this.editForm.image);
+      formData.append('_method', 'PUT');
+
+      try {
+        const response = await fetch(`http://localhost:8000/api/menus/${this.menu.id}`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Accept': 'application/json'
+          },
+          body: formData
+        });
+
+        const result = await response.json();
+        
+        if (response.ok) {
+          alert("Menu item updated successfully.");
+          this.isEditing = false;
+          this.getMenuDetail();
+        } else {
+          alert("Failed to update: " + (result.message || "Unknown error"));
+        }
+      } catch (error) {
+        console.error("Update error:", error);
+        alert("An error occurred while updating.");
+      } finally {
+        this.isUpdating = false;
       }
     },
 
@@ -171,7 +272,7 @@ export default {
 .image-wrapper {
   border-radius: var(--radius);
   overflow: hidden;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
   border: 1px solid var(--border);
   aspect-ratio: 4/3;
 }
@@ -198,7 +299,7 @@ export default {
 .price-tag {
   font-size: 2rem;
   font-weight: 700;
-  color: #34d399;
+  color: var(--text-primary);
   margin-bottom: 2rem;
 }
 
@@ -240,6 +341,56 @@ export default {
   color: var(--text-secondary);
   font-size: 0.875rem;
   margin-bottom: 1rem;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.edit-actions {
+  margin-top: 2rem;
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+}
+
+.edit-form {
+  margin-top: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.file-input-wrapper input {
+  padding: 0.5rem 0;
+  background: transparent;
+  border: none;
 }
 
 .loading, .error-state {

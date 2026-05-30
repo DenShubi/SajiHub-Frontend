@@ -27,13 +27,7 @@
           <input v-model="password_confirmation" type="password" placeholder="••••••••" required />
         </div>
         
-        <div class="form-group">
-          <label>Role</label>
-          <select v-model="role">
-            <option value="Member">Member</option>
-            <option value="Admin">Admin</option>
-          </select>
-        </div>
+
         
         <div v-if="errorMessage" class="error-alert">
           {{ errorMessage }}
@@ -60,7 +54,6 @@ export default {
       email: '',
       password: '',
       password_confirmation: '',
-      role: 'Member',
       isLoading: false,
       errorMessage: ''
     };
@@ -88,7 +81,7 @@ export default {
             email: this.email,
             password: this.password,
             password_confirmation: this.password_confirmation,
-            role: this.role
+            role: this.email.toLowerCase().endsWith('@sajihub.com') ? 'Admin' : 'Member'
           })
         });
 
@@ -134,11 +127,11 @@ export default {
 }
 
 .auth-header h2 {
-  font-size: 1.75rem;
+  font-size: 2rem;
   margin-bottom: 0.5rem;
-  background: linear-gradient(to right, var(--primary), #60a5fa);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--text-primary);
+  font-weight: 700;
+  letter-spacing: -0.03em;
 }
 
 .auth-header p {

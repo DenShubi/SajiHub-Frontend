@@ -104,11 +104,11 @@ export default {
 }
 
 .auth-header h2 {
-  font-size: 1.75rem;
+  font-size: 2rem;
   margin-bottom: 0.5rem;
-  background: linear-gradient(to right, var(--primary), #60a5fa);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--text-primary);
+  font-weight: 700;
+  letter-spacing: -0.03em;
 }
 
 .auth-header p {

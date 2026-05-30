@@ -189,8 +189,8 @@ export default {
 
 .form-card {
   margin-bottom: 2rem;
-  background: linear-gradient(145deg, var(--bg-card), #1e293b);
-  border: 1px solid var(--primary);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
 }
 
 .form-row {
@@ -251,7 +251,7 @@ export default {
   width: 100%;
   height: 200px;
   overflow: hidden;
-  background: #0f172a;
+  background: #f5f5f7;
 }
 
 .menu-image img {
@@ -275,10 +275,10 @@ export default {
 }
 
 .price {
-  color: #34d399;
+  color: var(--text-primary);
   font-weight: 600;
   margin-bottom: 0.75rem;
-  font-size: 1.2rem;
+  font-size: 1.25rem;
 }
 
 .description {
