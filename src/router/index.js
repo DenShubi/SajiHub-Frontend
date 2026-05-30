@@ -3,6 +3,9 @@ import Login from '../views/Login.vue'
 import Register from '../views/Register.vue'
 import Dashboard from '../views/Dashboard.vue'
 import MenuDetail from '../components/MenuDetail.vue'
+import Orders from '../views/Orders.vue'
+import OrderDetail from '../views/OrderDetail.vue'
+import AdminOrders from '../views/AdminOrders.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -31,6 +34,24 @@ const router = createRouter({
       path: '/menu/:id',
       name: 'menu-detail',
       component: MenuDetail,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/orders',
+      name: 'orders',
+      component: Orders,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/orders/:id',
+      name: 'order-detail',
+      component: OrderDetail,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/admin/orders',
+      name: 'admin-orders',
+      component: AdminOrders,
       meta: { requiresAuth: true }
     }
   ]

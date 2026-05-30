@@ -5,11 +5,22 @@
         <h2>SajiHub</h2>
       </div>
       <div class="nav-links">
-        <router-link to="/dashboard" class="nav-item">Dashboard</router-link>
+        <router-link to="/dashboard" class="nav-item">Menu</router-link>
+
+        <!-- Member: link ke pesanan saya -->
+        <router-link v-if="role === 'Member'" to="/orders" class="nav-item">
+          Pesanan Saya
+        </router-link>
+
+        <!-- Admin: link ke kelola order -->
+        <router-link v-if="role === 'Admin'" to="/admin/orders" class="nav-item">
+          Kelola Order
+        </router-link>
+
         <button @click="logout" class="btn-logout">Logout</button>
       </div>
     </header>
-    
+
     <main class="main-content">
       <router-view></router-view>
     </main>
@@ -21,8 +32,10 @@ export default {
   name: 'App',
   computed: {
     isAuthenticated() {
-      // Re-evaluate when route changes (simplified reactivity for token)
       return this.$route.name !== 'login' && this.$route.name !== 'register' && !!localStorage.getItem('token');
+    },
+    role() {
+      return localStorage.getItem('role');
     }
   },
   methods: {
